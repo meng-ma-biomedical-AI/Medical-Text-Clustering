@@ -109,3 +109,9 @@ venv.bak/
 kmeans*.txt
 patient*.txt
 funding*.txt
+
+chinese_word_dict.pickle
+cnkd_not_matched.csv
+mesh_ref_copy1.csv
+mimc_not_matched.csv
+
