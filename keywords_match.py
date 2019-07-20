@@ -8,6 +8,7 @@ import jieba
 import collections
 import pickle
 import codecs
+import pymysql
 import mysql.connector as sql
 
 def str_2_utf8(str):
@@ -28,36 +29,47 @@ if __name__ == "__main__":
 
     input_json = {"input_query_words": ["功能梯度材料", "耦合"], "input_keywords_dict": ["功能梯度材料", "耦合"]}
     # input_json = json.loads(sys.argv[1])
-    query_words = input_json['input_query_words']         # 需要查询的关键词列表(一个或多个)
-    keywords_dict = input_json['input_keywords_dict']     # 用户提供的词典(一个或多个)，词典中每个词代表一个实体
-    # type(query_words) = list of string
-    # type(keyword_dict) = list of string
+    query_words = input_json['input_query_words']         # 需要查询的关键词列表(一个或多个) list of string
+    keywords_dict = input_json['input_keywords_dict']     # 用户提供的词典(一个或多个)，词典中每个词代表一个实体 list of string
 
-    db_connection = sql.connect(host='rm-2zet5lw17as40fty28o.mysql.rds.aliyuncs.com',
-                                database='medo_master',
-                                user='snowball',
-                                password='MEDOsnow$%^&')
+    conn = pymysql.connect(host = 'rm-2zet5lw17as40fty28o.mysql.rds.aliyuncs.com',
+                           port = 3306,
+                           user = 'snowball',
+                           passwd = 'MEDOsnow$%^&',
+                           db = 'medo_master')
+    cur = conn.cursor()
 
     sql_condition = ""
     sql_condition_template = "name LIKE '%%%s%%' or keywordCH like '%%%s%%' or keywordEn like '%%%s%%' or summaryCH like '%%%s%%' or comSummary like '%%%s%%'"
     for idx, word in enumerate(query_words):
         if idx == 0:
-            sql_condition += sql_condition_template % (str_2_utf8(word), str_2_utf8(word), str_2_utf8(word), str_2_utf8(word), str_2_utf8(word))
+            sql_condition += sql_condition_template % (word, word, word, word, word)
         else:
-            sql_condition += " or " + sql_condition_template % (str_2_utf8(word), str_2_utf8(word), str_2_utf8(word), str_2_utf8(word), str_2_utf8(word))
+            sql_condition += " or " + sql_condition_template % (word, word, word, word, word)
 
-    print(sql_condition)
     sql_command = "SELECT * FROM nsfc_data WHERE " + sql_condition
-    print(sql_command)
+    print('SQL: ', sql_command)
 
-    search_results = pd.read_sql(sql_command, con = db_connection)
-    search_results.dropna(axis=0, inplace=True)
-    print(len(search_results))
+    cur.execute(sql_command)
+    res = cur.fetchall()
+    res_df = pd.DataFrame(list(res), columns=['applyCode', 'category', 'categoryCode', 'code', 'comSummary',
+                                              'fundedYearEnd', 'fundedYearStart', 'funding', 'keywordCh',
+                                              'keywordEn', 'leader', 'leaderCode', 'leaderTitle', 'name',
+                                              'organization', 'organizationCode', 'outComeAwardNum',
+                                              'outComeConferenceNum', 'outComeJournalNum', 'outComePatent',
+                                              'outComeWorkNum', 'searchYearEnd', 'summaryCh', 'summaryEn',
+                                              'tranceNo', 'DID'])
 
 
 
 
 
+
+
+
+
+
+    # res_df.to_csv('./demo_search_res.csv')
 
 
 
