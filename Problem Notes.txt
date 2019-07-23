@@ -6,7 +6,7 @@ input_keywords_dict：用户提供的词典(一个或多个)，词典中每个�
 算法流程：
 1. 用input_query_words中的词查询数据库，返回数据列表A
 2. 利用input_keywords_dict中的词对数据列表A中的数据进行分词，将每条数据切为词的列表
-3. 从列表A中，找出包含input_query_words中实体的数据，去除不包含input_query_words中实体的数据，得到数据列表B
+3. 从列表A中，找出包含input_query_words中实体词的数据，去除不包含input_query_words中实体词的数据，得到数据列表B
 4. 将数据列表B存储到本地csv文件
 
 

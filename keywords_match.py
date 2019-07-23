@@ -3,9 +3,11 @@ import json
 import pandas as pd
 import numpy as np
 import re
+import os
 import time
 import string
 import jieba
+import thulac
 import pickle
 import codecs
 import pymysql
@@ -31,6 +33,7 @@ def jieba_cut(text, user_dict):
         text = ""
     with NamedTemporaryFile('w+t', suffix='.txt') as f:
         f.write("\n".join(user_dict))
+        f.read()
         # print(f.name)
         jieba.load_userdict(f.name)
         return list(jieba.cut(text, cut_all=False))
@@ -52,7 +55,7 @@ if __name__ == "__main__":
                            db = 'medo_master')
     cur = conn.cursor()
 
-    print(jieba_cut('心脏毒性是一种病。', keywords_dict))
+    # print(jieba_cut('心脏毒性是一种病。', keywords_dict))
 
     sql_condition = ""
     sql_condition_template = "name LIKE '%%%s%%' or keywordCh like '%%%s%%' or keywordEn like '%%%s%%' or summaryCh like '%%%s%%' or comSummary like '%%%s%%'"
@@ -80,8 +83,13 @@ if __name__ == "__main__":
     drop_idx = []
     with NamedTemporaryFile('w+t', suffix='.txt') as f:
         f.write("\n".join(keywords_dict))
-        # print(f.name)
+        f.read()
+
         jieba.load_userdict(f.name)
+
+        # seg = thulac.thulac(seg_only=True)
+        # seg = thulac.thulac(user_dict=f.name, seg_only=True)
+
         for idx, row in res_df.iterrows():
             contain_word = True
             for word in query_words:
@@ -92,8 +100,13 @@ if __name__ == "__main__":
                 for col in text_columns:
                     if contained_in_one_column:
                         break
-                    print(jieba_cut('心脏毒性是一种病。', keywords_dict))
+
+                    print(list(jieba.cut('心脏毒性是一种有毒性的东西。', cut_all=False)))
                     col_text_list = [] if not row[col] else list(jieba.cut(row[col], cut_all=False))
+
+                    # print(seg.cut('心脏毒性是一种有毒性的东西。', text=True))
+                    # col_text_list = [] if not row[col] else seg.cut(row[col], text=True).split()
+
                     contained_in_one_column |= word in col_text_list
                 contain_word &= contained_in_one_column
 
