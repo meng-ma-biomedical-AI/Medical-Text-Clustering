@@ -118,3 +118,5 @@ all_query_text.txt
 
 API
 node_modules
+
+*.json
