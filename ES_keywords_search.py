@@ -67,8 +67,9 @@ def build_index(post_batch, table_name, table_fields):
                            db='medo_master')
 
     res = fetch_mysql_data(conn, table_name, table_fields)
+    print("Fetch Data Done.")
 
-    for idx in range(0, len(res), post_batch):
+    for idx in tqdm(range(0, len(res), post_batch)):
         json_data_gen(res[idx : idx + post_batch], table_name, table_fields, idx)
         batch_post_command = "curl -XPOST localhost:9200/_bulk --data-binary @json_data_temp.json"
         os.system(batch_post_command)
@@ -85,22 +86,26 @@ def query_keyword(index_name, query_field, query_keyword):
     '''
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
     search_body_dict = { "query": {"term": {query_field : query_keyword} } }
+    # search_command = "curl 'localhost:9200/" + index_name + "/_search'  -d '" + json.dumps(search_body_dict) + "'"
+    # results = json.loads(os.popen(search_command).read())
     results = es.search(index = index_name, body = json.dumps(search_body_dict) )
+    # print(results)
     hits = results['hits']['hits']
+    print(len(hits))
     for idx, res in enumerate(hits):
-        print(str(idx + 1) + ":  " + res['_source']['comSummary'])
+        print(str(idx + 1) + ":  " + res['_source'][query_field])
 
 
 if __name__ == '__main__':
 
-    # table_name, table_fields, data_num, spend_time = build_index(20000, "nsfc_data", ["applyCode", "comSummary"])
-    # print("Build Index Done.")
-    # print("Index Table: ", table_name)
-    # print("Index Table Fields: ", table_fields)
-    # print("Number of Data: ", data_num)
-    # print("Building Time: ", spend_time)
+    table_name, table_fields, data_num, spend_time = build_index(400000, "wf_article", ["id", "title"])
+    print("Build Index Done.")
+    print("Index Table: ", table_name)
+    print("Index Table Fields: ", table_fields)
+    print("Number of Data: ", data_num)
+    print("Building Time: ", spend_time)
 
-    query_keyword("nsfc_data", "comSummary", "心脏毒性")
+    # query_keyword("wf_article", "title", "心脏毒性")
 
 
 
