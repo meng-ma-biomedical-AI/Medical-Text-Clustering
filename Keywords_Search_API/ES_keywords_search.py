@@ -1,16 +1,10 @@
-from tqdm import tqdm
 import os
-import re
+import gc
 import time
 import json
-import codecs
-import jieba
-import pickle
-import pandas as pd
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 import pymysql
-import mysql.connector as sql
 
 def fetch_mysql_data(db_conn, table_name, table_fields):
     '''
@@ -67,14 +61,18 @@ def build_index(post_batch, table_name, table_fields):
                            db='medo_master')
 
     res = fetch_mysql_data(conn, table_name, table_fields)
-    print("Fetch Data Done.")
+    data_num = len(res)
+    print("\nFetch Data Done.\n")
 
-    for idx in tqdm(range(0, len(res), post_batch)):
+    for idx in range(0, data_num, post_batch):
         json_data_gen(res[idx : idx + post_batch], table_name, table_fields, idx)
         batch_post_command = "curl -XPOST localhost:9200/_bulk --data-binary @json_data_temp.json"
         os.system(batch_post_command)
 
-    return (table_name, table_fields, len(res), time.time() - start_time)
+    del res
+    gc.collect()    # 索引建好后，释放从数据库中读取的数据所占用的内存
+
+    return (table_name, table_fields, data_num, time.time() - start_time)
 
 
 def query_keyword(index_name, query_field, query_keyword):
