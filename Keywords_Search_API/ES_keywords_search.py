@@ -110,15 +110,22 @@ def query_keyword(index_name, query_field, query_keyword):
     print(len(hits))
     # for idx, res in enumerate(hits):
     #     print(str(idx + 1) + ":  " + res['_source'][query_field])
-
     return hits
     # return results
 
 if __name__ == '__main__':
 
-    a = os.popen("curl -X GET 'http://localhost:9200/_cat/count/wf_article?v'").read()
-    print(a.split())
-    print(type(a))
+    pass
+
+    # conn = pymysql.connect(host='rm-2zet5lw17as40fty28o.mysql.rds.aliyuncs.com',
+    #                        port=3306,
+    #                        user='snowball',
+    #                        passwd='MEDOsnow$%^&',
+    #                        db='medo_master')
+
+    # a = os.popen("curl -X GET 'http://localhost:9200/_cat/count/wf_article?v'").read()
+    # print(a.split())
+    # print(type(a))
 
     # table_name, table_fields, data_num, spend_time = build_index(400000, "wf_article", ["id", "title"])
     # print("Build Index Done.")
@@ -128,7 +135,6 @@ if __name__ == '__main__':
     # print("Building Time: ", spend_time)
 
     # query_keyword("wf_article", "title", "心脏毒性")
-
 
 
 
